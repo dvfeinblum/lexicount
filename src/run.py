@@ -1,3 +1,4 @@
+import ast
 from bs4 import BeautifulSoup
 import re
 from redis import StrictRedis
@@ -24,10 +25,19 @@ def get_blogpost_links():
     return links
 
 
+def parse_blog_post(blog_link):
+    resp = get(blog_link)
+    print(resp.content)
+
+
 if __name__ == "__main__":
     blog_links = client.get(LINKS_KEY)
     if blog_links is None:
         print('Link cache is currently empty. Scraping blog feed at {}'.format(BLOG_FEED_URL))
         blog_links = get_blogpost_links()
+    else:
+        print('Link cache was hit.')
+        blog_links = ast.literal_eval(blog_links.decode('utf-8'))
 
-    print(blog_links)
+    for link in blog_links:
+        parse_blog_post(link)
