@@ -4,7 +4,7 @@ import nltk
 import re
 from redis import StrictRedis
 from requests import get
-import src.utils as utils
+import utils as utils
 
 BLOG_FEED_URL = 'http://avagadbro.blogspot.com/feeds/posts/default'
 
