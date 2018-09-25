@@ -4,7 +4,7 @@ import nltk
 import re
 from redis import StrictRedis
 from requests import get
-import string
+import src.utils as utils
 
 BLOG_FEED_URL = 'http://avagadbro.blogspot.com/feeds/posts/default'
 
@@ -23,6 +23,9 @@ LINKS_KEY = 'blog_links'
 blogs_scraped_counter = 0
 word_count = 0
 pos_counts = {}
+
+# Makes for easier debugging when it comes to nltk failures
+error_file = open('error.txt', 'w')
 
 
 def get_blogpost_links():
@@ -47,19 +50,13 @@ def parse_blog_post(blog_link):
     """
     global blogs_scraped_counter
     global word_count
+    global error_file
     print('Fetching raw text for {}'.format(blog_link))
     soup = BeautifulSoup(get(blog_link).content,
                          features='html.parser')
     post_text = soup.find('div', attrs={'class': POST_BODY_CLASS}).get_text()
 
-    # To remove punctuation, we use a translator
-    translator = str.maketrans('', '', string.punctuation)
-
-    sanitized_post_text = post_text.replace('\r', '') \
-        .replace('\n', '') \
-        .translate(translator) \
-        .replace('\n','') \
-        .lower()
+    sanitized_post_text = utils.sanitize_blogpost(post_text)
     print('Successfully parsed post. Updating word counts in redis.')
     for word in sanitized_post_text.split(' '):
         # First we hit the word count cache
@@ -78,8 +75,8 @@ def parse_blog_post(blog_link):
             else:
                 pos_counts[pos] = 1
         except Exception as e:
-            print(e)
-            print(repr(sanitized_post_text))
+            print('failed to nltk-ify a post.\nURL: {url}\nException: {e}'.format(e=e, url=blog_link))
+            error_file.write('URL: ' + blog_link + '\n' + repr(sanitized_post_text) + '\n')
 
     blogs_scraped_counter = blogs_scraped_counter + 1
 
@@ -114,3 +111,4 @@ if __name__ == "__main__":
         parse_blog_post(link)
 
     get_results()
+    error_file.close()
