@@ -26,5 +26,15 @@ python src/run.py
 ```
 and it should get going on its own.
 
+Oh! Also. If you would like to crawl along your own blog, there are a couple things you have to do:
+
+1. Make sure you have a blogpost.com blog. Currently, there's some hardcoded stuff that assumes you'll be using a feed from one of those.
+1. Set this envvar:
+```bash
+BLOG_FEED_URL="http://[YOUR USER NAME].blogspot.com/feeds/posts/default"
+```
+
+and that's it! The script will do the rest.
+
 # Notes
 Right now, this tool is very blunt and there's much I will be changing. Also, sometimes the nltk doesn't quite work because my scraping skills are bad. That's what error.txt is for.

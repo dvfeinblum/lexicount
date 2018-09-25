@@ -6,10 +6,7 @@ from redis import StrictRedis
 from requests import get
 import utils as utils
 
-BLOG_FEED_URL = 'http://avagadbro.blogspot.com/feeds/posts/default'
-
 # Some useful constants for parsing blog html
-POST_PREFIX_REGEX = "^http://avagadbro.blogspot.com/2"
 POST_URL_REL = "alternate"
 POST_BODY_CLASS = 'post-body entry-content'
 
@@ -33,9 +30,9 @@ def get_blogpost_links():
     This goes to the RSS for the blog and fetches a URL from each post
     :return: Array of URLs
     """
-    soup = BeautifulSoup(get(BLOG_FEED_URL).content,
+    soup = BeautifulSoup(get(utils.BLOG_FEED_URL).content,
                          features='html.parser')
-    links = [l.attrs['href'] for l in soup.findAll('link', attrs={'href': re.compile(POST_PREFIX_REGEX),
+    links = [l.attrs['href'] for l in soup.findAll('link', attrs={'href': re.compile(utils.POST_PREFIX_REGEX),
                                                                   'rel': POST_URL_REL})]
     word_client.set(LINKS_KEY, links)
 
@@ -101,7 +98,7 @@ def get_results():
 if __name__ == "__main__":
     blog_links = word_client.get(LINKS_KEY)
     if blog_links is None:
-        print('Link cache is currently empty. Scraping blog feed at {}'.format(BLOG_FEED_URL))
+        print('Link cache is currently empty. Scraping blog feed at {}'.format(utils.BLOG_FEED_URL))
         blog_links = get_blogpost_links()
     else:
         print('Link cache was hit.')
