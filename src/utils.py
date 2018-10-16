@@ -1,11 +1,11 @@
 import os
-import string
 import sys
 from urllib.parse import urlparse
 import validators
 
 # To remove punctuation, we use a translator
-translator = str.maketrans('', '', string.punctuation)
+# Note that the blob in the 3rd position is string.punctuation with '-' removed
+translator = str.maketrans('', '', '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~')
 
 # Blog constants
 if 'BLOG_FEED_URL' in os.environ:
