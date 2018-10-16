@@ -1,11 +1,14 @@
 import os
-import string
 import sys
 from urllib.parse import urlparse
 import validators
 
 # To remove punctuation, we use a translator
-translator = str.maketrans('', '', string.punctuation)
+# Note that the blob in the 3rd position is string.punctuation with '-' removed
+translator = str.maketrans('', '', '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~')
+
+# Because ya know
+DEBUG_MODE = os.environ.get('DEBUG_MODE')
 
 # Blog constants
 if 'BLOG_FEED_URL' in os.environ:
@@ -29,9 +32,9 @@ def sanitize_blogpost(post):
     :param post:
     :return:
     """
-    return post.translate(translator) \
-        .replace('\n\n', '\n') \
-        .replace('\r', '').replace('\n', '') \
+    return post.replace('\n\n', '\n') \
+        .replace('\r', ' ').replace('\n', ' ') \
         .replace('  ', ' ') \
+        .translate(translator) \
         .strip() \
         .lower()
