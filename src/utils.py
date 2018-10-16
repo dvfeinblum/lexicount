@@ -32,9 +32,9 @@ def sanitize_blogpost(post):
     :param post:
     :return:
     """
-    return post.translate(translator) \
-        .replace('\n\n', '\n') \
-        .replace('\r', '').replace('\n', '') \
+    return post.replace('\n\n', '\n') \
+        .replace('\r', ' ').replace('\n', ' ') \
         .replace('  ', ' ') \
+        .translate(translator) \
         .strip() \
         .lower()
