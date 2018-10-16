@@ -7,6 +7,9 @@ import validators
 # Note that the blob in the 3rd position is string.punctuation with '-' removed
 translator = str.maketrans('', '', '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~')
 
+# Because ya know
+DEBUG_MODE = os.environ.get('DEBUG_MODE')
+
 # Blog constants
 if 'BLOG_FEED_URL' in os.environ:
     feed_url = os.environ['BLOG_FEED_URL']
