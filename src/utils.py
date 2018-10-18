@@ -34,7 +34,7 @@ def sanitize_blogpost(post):
     """
     return post.replace('\n\n', '\n') \
         .replace('\r', ' ').replace('\n', ' ') \
-        .replace('  ', ' ') \
         .translate(translator) \
+        .replace('  ', ' ') \
         .strip() \
         .lower()
