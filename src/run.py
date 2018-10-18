@@ -1,4 +1,5 @@
 import ast
+import asyncio
 from bs4 import BeautifulSoup
 from datetime import datetime
 import nltk
@@ -40,7 +41,16 @@ def get_blogpost_links():
     return links
 
 
-def parse_blog_post(blog_link):
+async def fetch_posts(urls):
+    """
+    Wrapper that allows blogposts to be fetched asynchronously
+    :param urls: List of blog urls
+    """
+    coroutines = [parse_blog_post(url) for url in urls]
+    await asyncio.wait(coroutines)
+
+
+async def parse_blog_post(blog_link):
     """
     Given a blog post's URL, this function GETs it and pulls the body out
     :param blog_link: String
@@ -87,7 +97,6 @@ def parse_blog_post(blog_link):
 def get_results():
     """
     Once the run is complete, we'll spit out some stats.
-    :return:
     """
     # we subtract one because of the blog_links entry
     unique_word_count = word_client.dbsize() - 1
@@ -114,9 +123,11 @@ if __name__ == "__main__":
     if utils.DEBUG_MODE:
         blog_links = [blog_links[0]]
 
-    for link in blog_links:
-        parse_blog_post(link)
-
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(fetch_posts(blog_links))
+    finally:
+        loop.close()
     end = datetime.now()
     print('This run took {} seconds'.format((end-start).total_seconds()))
 
