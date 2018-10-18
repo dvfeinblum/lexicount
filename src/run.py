@@ -1,5 +1,6 @@
 import ast
 from bs4 import BeautifulSoup
+from datetime import datetime
 import nltk
 import re
 from redis import StrictRedis
@@ -54,7 +55,7 @@ def parse_blog_post(blog_link):
     post_text = soup.find('div', attrs={'class': POST_BODY_CLASS}).get_text()
 
     sanitized_post_text = utils.sanitize_blogpost(post_text)
-    print('Successfully parsed post. Updating word counts in redis.')
+    print('Successfully parsed post. Updating word counts in redis.\n')
     if utils.DEBUG_MODE:
         print('\nSanitized blogpost:\n{clean}\n\nOriginal text:{orig}'.format(clean=sanitized_post_text,
                                                                               orig=post_text))
@@ -75,8 +76,10 @@ def parse_blog_post(blog_link):
             else:
                 pos_counts[pos] = 1
         except Exception as e:
-            print('failed to nltk-ify a post.\nURL: {url}\nException: {e}'.format(e=e, url=blog_link))
-            error_file.write('URL: ' + blog_link + '\n' + repr(sanitized_post_text) + '\n')
+            # This is the only instance in which an exception is actually cause for concern
+            if len(word) > 0:
+                print('failed to nltk-ify a post.\nURL: {url}\nException: {e}'.format(e=e, url=blog_link))
+                error_file.write('URL: ' + blog_link + '\n' + repr(sanitized_post_text) + '\n')
 
     blogs_scraped_counter = blogs_scraped_counter + 1
 
@@ -99,6 +102,7 @@ def get_results():
 
 
 if __name__ == "__main__":
+    start = datetime.now()
     blog_links = word_client.get(LINKS_KEY)
     if blog_links is None:
         print('Link cache is currently empty. Scraping blog feed at {}'.format(utils.BLOG_FEED_URL))
@@ -112,6 +116,9 @@ if __name__ == "__main__":
 
     for link in blog_links:
         parse_blog_post(link)
+
+    end = datetime.now()
+    print('This run took {} seconds'.format((end-start).total_seconds()))
 
     get_results()
     error_file.close()
