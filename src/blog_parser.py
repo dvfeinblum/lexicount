@@ -5,8 +5,8 @@ import nltk
 import re
 import requests as r
 
-from redis_init import nltk_client, LINKS_KEY, word_client
 import utils
+from redis_init import nltk_client, LINKS_KEY, word_client
 
 # Some useful constants for parsing blog html
 POST_URL_REL = "alternate"
@@ -14,9 +14,6 @@ POST_BODY_CLASS = 'post-body entry-content'
 blogs_scraped_counter = 0
 word_count = 0
 pos_counts = {}
-
-# Makes for easier debugging when it comes to nltk failures
-error_file = open('error.txt', 'w')
 
 
 def get_blogpost_links():
@@ -44,13 +41,13 @@ async def fetch_posts(urls):
 
 async def parse_blog_post(blog_link):
     """
-    Given a blog post's URL, this function GETs it and pulls the body out
+    Given a blog post's URL, this function GETs it and pulls the body out.
+    We then analyze each word with NTLK and write some data into redis.
     :param blog_link: String
     :return: Raw text from the blog post w/html tags stripped out
     """
     global blogs_scraped_counter
     global word_count
-    global error_file
     print('Fetching raw text for {}'.format(blog_link))
     soup = BeautifulSoup(r.get(blog_link).content,
                          features='html.parser')
@@ -61,29 +58,46 @@ async def parse_blog_post(blog_link):
     if utils.DEBUG_MODE:
         print('\nSanitized blogpost:\n{clean}\n\nOriginal text:{orig}'.format(clean=sanitized_post_text,
                                                                               orig=post_text))
-    for word in sanitized_post_text.split(' '):
-        # First we hit the word count cache
-        word_client.incr(word)
-        word_count = word_count + 1
 
-        # Now we do some nltk wizardry
-        try:
-            pos_array = nltk.pos_tag([word])
-
-            pos_tuple = pos_array[0]
-            pos = pos_tuple[1]
-            nltk_client.incr(pos)
-            if pos in pos_counts:
-                pos_counts[pos] = pos_counts[pos] + 1
-            else:
-                pos_counts[pos] = 1
-        except Exception as e:
-            # This is the only instance in which an exception is actually cause for concern
-            if len(word) > 0:
-                print('failed to nltk-ify a post.\nURL: {url}\nException: {e}'.format(e=e, url=blog_link))
-                error_file.write('URL: ' + blog_link + '\n' + repr(sanitized_post_text) + '\n')
+    [analyze_word(word, blog_link) for word in sanitized_post_text.split(' ')]
 
     blogs_scraped_counter = blogs_scraped_counter + 1
+
+
+def analyze_word(word, blog_link):
+    """
+    Given a word, we figure out its POS and store various info in redis.
+    :param word: str
+    :param blog_link: url that the word came from, only used for logging
+    :return: tuple containing the word and POS of that word
+    """
+    global word_count
+    # First we hit the word count cache
+    word_client.incr(word)
+    word_count = word_count + 1
+
+    # Now we do some nltk wizardry
+    try:
+        pos_array = nltk.pos_tag([word])
+
+        pos_tuple = pos_array[0]
+        pos = pos_tuple[1]
+        nltk_client.incr(pos)
+        if pos in pos_counts:
+            pos_counts[pos] = pos_counts[pos] + 1
+        else:
+            pos_counts[pos] = 1
+
+        # we don't actually need this but it's useful for testing
+        return pos_tuple
+    except IndexError:
+        # This is the only instance in which an exception is actually cause for concern
+        if len(word) > 0:
+            print('Failed to nltk-ify a post.\nURL: {url}\nWord: {word}'.format(url=blog_link,
+                                                                                word=word))
+    except Exception as e:
+        print('Word analyzer encountered an unexpected exception on word: {w}\n Exception:{e}'.format(w=word,
+                                                                                                      e=e))
 
 
 def get_results():
@@ -121,4 +135,3 @@ def main():
         loop.close()
 
     get_results()
-    error_file.close()
