@@ -19,6 +19,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+NOTE: NLTK requires various downloads to work properly. Once you've finished installing the requirements, you should open a python REPL and run the following:
+```
+>>> import nltk
+>>> nltk.download('averaged_perceptron_tagger')
+```
+
 ## Running the thing
 Once you get that working, you're basically all set. Simply run:
 ```
