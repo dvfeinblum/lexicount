@@ -4,3 +4,4 @@
 
 table.public.word_details 2018-10-27T07:04:48Z David Feinblum <dvfeinblum@gmail.com> # created word_details table
 table.public.blog_details 2018-10-27T14:26:55Z David Feinblum <dvfeinblum@gmail.com> # created blog_details table
+@0.0.1 2018-10-27T15:22:37Z David Feinblum <dvfeinblum@gmail.com> # initial table creation
