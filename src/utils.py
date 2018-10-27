@@ -22,7 +22,8 @@ if 'BLOG_FEED_URL' in os.environ:
 else:
     BLOG_FEED_URL = 'http://avagadbro.blogspot.com/feeds/posts/default'
 
-POST_PREFIX_REGEX = '^{uri.scheme}://{uri.netloc}/2'.format(uri=urlparse(BLOG_FEED_URL))
+POST_PREFIX_REGEX = '^{uri.scheme}://{uri.netloc}/2'.format(
+    uri=urlparse(BLOG_FEED_URL))
 
 
 def sanitize_blogpost(post):
