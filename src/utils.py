@@ -3,6 +3,8 @@ import sys
 from urllib.parse import urlparse
 import validators
 
+from db_utils import get_connection
+
 # To remove punctuation, we use a translator
 # Note that the blob in the 3rd position is string.punctuation with '-' removed
 translator = str.maketrans('', '', '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~')
@@ -22,7 +24,8 @@ if 'BLOG_FEED_URL' in os.environ:
 else:
     BLOG_FEED_URL = 'http://avagadbro.blogspot.com/feeds/posts/default'
 
-POST_PREFIX_REGEX = '^{uri.scheme}://{uri.netloc}/2'.format(uri=urlparse(BLOG_FEED_URL))
+POST_PREFIX_REGEX = '^{uri.scheme}://{uri.netloc}/2'.format(
+    uri=urlparse(BLOG_FEED_URL))
 
 
 def sanitize_blogpost(post):

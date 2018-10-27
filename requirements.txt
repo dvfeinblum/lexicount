@@ -1,6 +1,7 @@
 beautifulsoup4 >= 4.6.3
 nltk >= 3.3
 pre-commit==1.10.3
+psycopg2 >= 2.7.5
 redis >= 2.10.6
 requests >= 2.19.1
 validators

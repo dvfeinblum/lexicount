@@ -4,9 +4,15 @@ This is a little tool I wrote to see how obnoxious a writer I am.
 # Getting Started
 ## Setup
 The backend for this tool is a simple postgres database. For ease of use, you can set it up using docker:
-```
+```bash
 cd sqitch/
 docker-compose up
+```
+
+Also, there's a redis that's used for caching stuff. That's also nice and easy to set up:
+```bash
+docker pull redis
+docker run -d -p 6379:6379 redis
 ```
 
 Now that you have the db, you're actually ready to go. Set up a `venv` and install requirements with:
