@@ -7,3 +7,4 @@ table.public.blog_details 2018-10-27T14:26:55Z David Feinblum <dvfeinblum@gmail.
 @0.0.1 2018-10-27T15:22:37Z David Feinblum <dvfeinblum@gmail.com> # initial table creation
 
 role.blog_parser 2018-10-27T17:13:37Z David Feinblum <dvfeinblum@gmail.com> # added a role for the blog parser
+@0.1.0 2018-10-27T19:50:01Z David Feinblum <dvfeinblum@gmail.com> # Finished necessary tables and permissioning for parser

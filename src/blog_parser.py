@@ -5,7 +5,7 @@ import nltk
 import re
 import requests as r
 
-from db_utils import update_blog_details, update_word_details, get_unique_words
+from db_utils import update_blog_details, update_word_details, get_unique_words, close_db_connection
 import utils
 from redis_init import LINKS_KEY, word_client
 
@@ -140,3 +140,4 @@ def main():
         loop.close()
 
     get_results()
+    close_db_connection()

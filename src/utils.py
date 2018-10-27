@@ -3,8 +3,6 @@ import sys
 from urllib.parse import urlparse
 import validators
 
-from db_utils import get_connection
-
 # To remove punctuation, we use a translator
 # Note that the blob in the 3rd position is string.punctuation with '-' removed
 translator = str.maketrans('', '', '!"#$%&\'()*+,./:;<=>?@[\\]^_`{|}~')
