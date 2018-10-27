@@ -26,7 +26,7 @@ _db_conn = pg.connect(host=_PG_HOST,
 _db_cursor = _db_conn.cursor()
 
 
-def execute_and_commit(query):
+def execute_query(query):
     """
     Fetches a connection to our pg db
     """
@@ -35,7 +35,6 @@ def execute_and_commit(query):
         result = _db_cursor.fetchall()
     except pg.ProgrammingError:
         result = None
-    _db_conn.commit()
     return result
 
 
@@ -45,8 +44,8 @@ def update_word_details(word, pos):
     :param word: it's uh.. a word. Pulled from the blog post being parsed
     :param pos: part of speech as determined by NLTK
     """
-    execute_and_commit(_WORD_UPDATE_QUERY.format(word=word,
-                                                 pos=pos))
+    execute_query(_WORD_UPDATE_QUERY.format(word=word,
+                                            pos=pos))
 
 
 def update_blog_details(word, url):
@@ -55,17 +54,18 @@ def update_blog_details(word, url):
     :param word: yeah again.. it's a word
     :param url: blog's url
     """
-    execute_and_commit(_BLOG_UPDATE_QUERY.format(word=word,
-                                                 url=url))
+    execute_query(_BLOG_UPDATE_QUERY.format(word=word,
+                                            url=url))
 
 
 def get_unique_words():
     """
     Runs a COUNT DISTINCT on the word_details table
     """
-    return execute_and_commit(_GET_WORD_COUNT_QUERY)[0][0]
+    return execute_query(_GET_WORD_COUNT_QUERY)[0][0]
 
 
 def close_db_connection():
     _db_cursor.close()
+    _db_conn.commit()
     _db_conn.close()
