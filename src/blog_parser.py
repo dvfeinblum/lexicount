@@ -5,8 +5,9 @@ import nltk
 import re
 import requests as r
 
+from db_utils import update_blog_details, update_word_details, get_unique_words
 import utils
-from redis_init import nltk_client, LINKS_KEY, word_client
+from redis_init import LINKS_KEY, word_client
 
 # Some useful constants for parsing blog html
 POST_URL_REL = "alternate"
@@ -72,8 +73,6 @@ def analyze_word(word, blog_link):
     :return: tuple containing the word and POS of that word
     """
     global word_count
-    # First we hit the word count cache
-    word_client.incr(word)
     word_count = word_count + 1
 
     # Now we do some nltk wizardry
@@ -82,7 +81,10 @@ def analyze_word(word, blog_link):
 
         pos_tuple = pos_array[0]
         pos = pos_tuple[1]
-        nltk_client.incr(pos)
+
+        # Send some info to the db
+        update_word_details(word, pos)
+        update_blog_details(word, blog_link)
         if pos in pos_counts:
             pos_counts[pos] = pos_counts[pos] + 1
         else:
@@ -105,21 +107,24 @@ def get_results():
     Once the run is complete, we'll spit out some stats.
     """
     # we subtract one because of the blog_links entry
-    unique_word_count = word_client.dbsize() - 1
+    unique_word_count = get_unique_words()
     print('\nRESULTS\n')
     print('Number of words found across all posts: {}'.format(word_count))
     print('Number of unique words found across all posts: {}'.format(unique_word_count))
     print('Number of posts scraped: {}\n'.format(blogs_scraped_counter))
     print('Average repeat-rate of all words: {}'.format(word_count / unique_word_count))
-    print('Average words per post: {}'.format(word_count / blogs_scraped_counter))
-    print('Unique words per post: {}\n'.format(unique_word_count / blogs_scraped_counter))
+    print('Average words per post: {}'.format(
+        word_count / blogs_scraped_counter))
+    print('Unique words per post: {}\n'.format(
+        unique_word_count / blogs_scraped_counter))
     print('Part of Speech stats: {}\n'.format(pos_counts))
 
 
 def main():
     blog_links = word_client.get(LINKS_KEY)
     if blog_links is None:
-        print('Link cache is currently empty. Scraping blog feed at {}'.format(utils.BLOG_FEED_URL))
+        print('Link cache is currently empty. Scraping blog feed at {}'.format(
+            utils.BLOG_FEED_URL))
         blog_links = get_blogpost_links()
     else:
         print('Link cache was hit.')
