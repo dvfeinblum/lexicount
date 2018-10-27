@@ -3,16 +3,13 @@ This is a little tool I wrote to see how obnoxious a writer I am.
 
 # Getting Started
 ## Setup
-You'll need to do a few things if you want to run this tool. First off, you need docker. Once you have it up and running:
+The backend for this tool is a simple postgres database. For ease of use, you can set it up using docker:
 ```
-docker pull redis
-```
-as we'll be using it to store results. Next, you need to get the cache up and running with:
-```
-docker run -d -p 6379:6379 redis
+cd sqitch/
+docker-compose up
 ```
 
-Now that you have the cache, you're actually ready to go. Set up a `venv` and install requirements with:
+Now that you have the db, you're actually ready to go. Set up a `venv` and install requirements with:
 ```
 python3 -m venv venv
 source venv/bin/activate
