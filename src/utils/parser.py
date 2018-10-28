@@ -24,6 +24,8 @@ else:
 
 POST_PREFIX_REGEX = '^{uri.scheme}://{uri.netloc}/2'.format(
     uri=urlparse(BLOG_FEED_URL))
+POST_URL_REL = "alternate"
+POST_BODY_CLASS = 'post-body entry-content'
 
 
 def sanitize_blogpost(post):

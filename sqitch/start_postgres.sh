@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 
 until psql -h mypgdb -p 5432 --username sqitch -d lexicount -c '\l'; do

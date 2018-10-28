@@ -5,13 +5,11 @@ import nltk
 import re
 import requests as r
 
-from db_utils import update_blog_details, update_word_details, get_unique_words, close_db_connection
-import utils
-from redis_init import LINKS_KEY, word_client
+from utils.pg import update_blog_details, update_word_details, get_unique_words, close_db_connection
+import utils.parser as parser_util
+from utils.redis import LINKS_KEY, word_client
 
-# Some useful constants for parsing blog html
-POST_URL_REL = "alternate"
-POST_BODY_CLASS = 'post-body entry-content'
+# Metrics for the report at the end
 blogs_scraped_counter = 0
 word_count = 0
 pos_counts = {}
@@ -22,10 +20,10 @@ def get_blogpost_links():
     This goes to the RSS for the blog and fetches a URL from each post
     :return: Array of URLs
     """
-    soup = BeautifulSoup(r.get(utils.BLOG_FEED_URL).content,
+    soup = BeautifulSoup(r.get(parser_util.BLOG_FEED_URL).content,
                          features='html.parser')
-    links = [l.attrs['href'] for l in soup.findAll('link', attrs={'href': re.compile(utils.POST_PREFIX_REGEX),
-                                                                  'rel': POST_URL_REL})]
+    links = [l.attrs['href'] for l in soup.findAll('link', attrs={'href': re.compile(parser_util.POST_PREFIX_REGEX),
+                                                                  'rel': parser_util.POST_URL_REL})]
     word_client.set(LINKS_KEY, links)
 
     return links
@@ -52,11 +50,12 @@ async def parse_blog_post(blog_link):
     print('Fetching raw text for {}'.format(blog_link))
     soup = BeautifulSoup(r.get(blog_link).content,
                          features='html.parser')
-    post_text = soup.find('div', attrs={'class': POST_BODY_CLASS}).get_text()
+    post_text = soup.find(
+        'div', attrs={'class': parser_util.POST_BODY_CLASS}).get_text()
 
-    sanitized_post_text = utils.sanitize_blogpost(post_text)
+    sanitized_post_text = parser_util.sanitize_blogpost(post_text)
     print('Successfully parsed post. Updating word counts in redis.\n')
-    if utils.DEBUG_MODE:
+    if parser_util.DEBUG_MODE:
         print('\nSanitized blogpost:\n{clean}\n\nOriginal text:{orig}'.format(clean=sanitized_post_text,
                                                                               orig=post_text))
 
@@ -124,13 +123,13 @@ def main():
     blog_links = word_client.get(LINKS_KEY)
     if blog_links is None:
         print('Link cache is currently empty. Scraping blog feed at {}'.format(
-            utils.BLOG_FEED_URL))
+            parser_util.BLOG_FEED_URL))
         blog_links = get_blogpost_links()
     else:
         print('Link cache was hit.')
         blog_links = ast.literal_eval(blog_links.decode('utf-8'))
 
-    if utils.DEBUG_MODE:
+    if parser_util.DEBUG_MODE:
         blog_links = [blog_links[0]]
 
     loop = asyncio.get_event_loop()

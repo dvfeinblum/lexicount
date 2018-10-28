@@ -44,8 +44,3 @@ BLOG_FEED_URL="http://[YOUR USER NAME].blogspot.com/feeds/posts/default"
 ```
 
 and that's it! The script will do the rest.
-
-# Notes
-Right now, this tool is very blunt and there's much I will be changing. Also, sometimes the nltk doesn't quite work because my scraping skills are bad. That's what error.txt is for.
-
-Oh and another thing, feel free to click over to the issues to see what I have planned next!
