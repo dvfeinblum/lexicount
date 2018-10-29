@@ -44,3 +44,9 @@ BLOG_FEED_URL="http://[YOUR USER NAME].blogspot.com/feeds/posts/default"
 ```
 
 and that's it! The script will do the rest.
+
+## Pre-Commit Hooks
+In order to keep my code squeaky clean, this repo features a pre-commit hook that runs autopep8. The formatter needs to be initialized after creating the venv. This can be done by running
+```bash
+pre-commit install
+```
