@@ -1,24 +1,31 @@
 import psycopg2 as pg
 
+# PG DB details
 _WORD_DETAILS_TABLE = 'public.word_details'
 _BLOG_DETAILS_TABLE = 'public.blog_details'
+_SENTENCE_DETAILS_TABLE = 'public.sentence_details'
 _PG_USER = 'blog_parser'
 _PG_HOST = '0.0.0.0'
 _PG_PORT = 5432
 _PG_DB = 'lexicount'
 
+# Queries
 _WORD_UPDATE_QUERY = "INSERT INTO " + _WORD_DETAILS_TABLE + \
                      " (word, count, part_of_speech) " \
                      "VALUES ('{word}', 1, '{pos}') " \
                      "ON CONFLICT (word) DO UPDATE SET count = " + \
-    _WORD_DETAILS_TABLE + ".count + 1;"
+                     _WORD_DETAILS_TABLE + ".count + 1;"
 _BLOG_UPDATE_QUERY = "INSERT INTO " + _BLOG_DETAILS_TABLE + \
                      " (word, count, url) " \
                      "VALUES ('{word}', 1, '{url}')" \
                      "ON CONFLICT (word, url) DO UPDATE SET count = " + \
-    _BLOG_DETAILS_TABLE + ".count + 1;"
+                     _BLOG_DETAILS_TABLE + ".count + 1;"
+_SENTENCE_UPDATE_QUERY = "INSERT INTO " + _SENTENCE_DETAILS_TABLE + \
+                         " (sentence, length, url, vector) " \
+                         "VALUES ('{sentence}', '{length}', '{url}', '{vector}');"
 _GET_WORD_COUNT_QUERY = 'SELECT COUNT(DISTINCT word) FROM word_details;'
 
+# Setup for writes
 _db_conn = pg.connect(host=_PG_HOST,
                       port=_PG_PORT,
                       user=_PG_USER,
@@ -26,7 +33,7 @@ _db_conn = pg.connect(host=_PG_HOST,
 _db_cursor = _db_conn.cursor()
 
 
-def execute_query(query):
+def _execute_query(query):
     """
     Fetches a connection to our pg db
     """
@@ -44,8 +51,8 @@ def update_word_details(word, pos):
     :param word: it's uh.. a word. Pulled from the blog post being parsed
     :param pos: part of speech as determined by NLTK
     """
-    execute_query(_WORD_UPDATE_QUERY.format(word=word,
-                                            pos=pos))
+    _execute_query(_WORD_UPDATE_QUERY.format(word=word,
+                                             pos=pos))
 
 
 def update_blog_details(word, url):
@@ -54,15 +61,28 @@ def update_blog_details(word, url):
     :param word: yeah again.. it's a word
     :param url: blog's url
     """
-    execute_query(_BLOG_UPDATE_QUERY.format(word=word,
-                                            url=url))
+    _execute_query(_BLOG_UPDATE_QUERY.format(word=word,
+                                             url=url))
+
+
+def update_sentence_details(sentence, url, vector):
+    """
+    Given a sentence, blog url, and vector, update the sentence details table.
+    :param sentence: Sanitized and pruned sentence
+    :param url: link to the blog sentence came from
+    :param vector: word2vec vector
+    """
+    _execute_query(_SENTENCE_UPDATE_QUERY.format(sentence=sentence,
+                                                 length=len(vector),
+                                                 vector=vector,
+                                                 url=url))
 
 
 def get_unique_words():
     """
     Runs a COUNT DISTINCT on the word_details table
     """
-    return execute_query(_GET_WORD_COUNT_QUERY)[0][0]
+    return _execute_query(_GET_WORD_COUNT_QUERY)[0][0]
 
 
 def close_db_connection():
