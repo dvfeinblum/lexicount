@@ -5,7 +5,7 @@ import nltk
 import re
 import requests as r
 
-from utils.pg import update_blog_details, update_word_details, get_unique_words, close_db_connection
+import utils.pg as pg
 import utils.parser as parser_util
 from utils.redis import LINKS_KEY, word_client
 
@@ -53,13 +53,17 @@ async def parse_blog_post(blog_link):
     post_text = soup.find(
         'div', attrs={'class': parser_util.POST_BODY_CLASS}).get_text()
 
-    sanitized_post_text = parser_util.sanitize_blogpost(post_text)
-    print('Successfully parsed post. Updating word counts in redis.\n')
+    sanitized_post_text = parser_util.sanitize_blogpost(
+        post_text, translator=parser_util.sentence_translator)
+    print('Successfully parsed post.')
     if parser_util.DEBUG_MODE:
         print('\nSanitized blogpost:\n{clean}\n\nOriginal text:{orig}'.format(clean=sanitized_post_text,
                                                                               orig=post_text))
-
-    [analyze_word(word, blog_link) for word in sanitized_post_text.split(' ')]
+    print('Adding sentence information to postgres.')
+    for sentence in sanitized_post_text.split('.'):
+        # TODO: Implement word2vec and send actual vector instead of empty tuple
+        pg.update_sentence_details(sentence, blog_link, '{}')
+        [analyze_word(word.strip(), blog_link) for word in sentence.split(' ')]
 
     blogs_scraped_counter = blogs_scraped_counter + 1
 
@@ -82,8 +86,8 @@ def analyze_word(word, blog_link):
         pos = pos_tuple[1]
 
         # Send some info to the db
-        update_word_details(word, pos)
-        update_blog_details(word, blog_link)
+        pg.update_word_details(word, pos)
+        pg.update_blog_details(word, blog_link)
         if pos in pos_counts:
             pos_counts[pos] = pos_counts[pos] + 1
         else:
@@ -106,7 +110,7 @@ def get_results():
     Once the run is complete, we'll spit out some stats.
     """
     # we subtract one because of the blog_links entry
-    unique_word_count = get_unique_words()
+    unique_word_count = pg.get_unique_words()
     print('\nRESULTS\n')
     print('Number of words found across all posts: {}'.format(word_count))
     print('Number of unique words found across all posts: {}'.format(unique_word_count))
@@ -139,4 +143,4 @@ def main():
         loop.close()
 
     get_results()
-    close_db_connection()
+    pg.close_db_connection()

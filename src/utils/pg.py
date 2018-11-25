@@ -51,8 +51,11 @@ def update_word_details(word, pos):
     :param word: it's uh.. a word. Pulled from the blog post being parsed
     :param pos: part of speech as determined by NLTK
     """
-    _execute_query(_WORD_UPDATE_QUERY.format(word=word,
-                                             pos=pos))
+    if len(word) < 1:
+        print('Skipping empty word.')
+    else:
+        _execute_query(_WORD_UPDATE_QUERY.format(word=word,
+                                                 pos=pos))
 
 
 def update_blog_details(word, url):
@@ -61,8 +64,11 @@ def update_blog_details(word, url):
     :param word: yeah again.. it's a word
     :param url: blog's url
     """
-    _execute_query(_BLOG_UPDATE_QUERY.format(word=word,
-                                             url=url))
+    if len(word) < 1:
+        print('Skipping empty word.')
+    else:
+        _execute_query(_BLOG_UPDATE_QUERY.format(word=word,
+                                                 url=url))
 
 
 def update_sentence_details(sentence, url, vector):
@@ -72,10 +78,14 @@ def update_sentence_details(sentence, url, vector):
     :param url: link to the blog sentence came from
     :param vector: word2vec vector
     """
-    _execute_query(_SENTENCE_UPDATE_QUERY.format(sentence=sentence,
-                                                 length=len(vector),
-                                                 vector=vector,
-                                                 url=url))
+    sentence_length = len(sentence)
+    if sentence_length < 1:
+        print("Skipping empty sentence.")
+    else:
+        _execute_query(_SENTENCE_UPDATE_QUERY.format(sentence=sentence,
+                                                     length=sentence_length,
+                                                     vector=vector,
+                                                     url=url))
 
 
 def get_unique_words():

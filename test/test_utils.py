@@ -22,11 +22,12 @@ class TestUtilities(TestCase):
                                'a plastic form to formless things and to have a music ' \
                                'of their own as sweet as that of viol or of lute mere ' \
                                'words was there anything so real as words also heres a hyphenated-word'
-        expected_sentence_result = 'words mere words how terrible they were how clear and vivid and cruel ' \
-                                   'one could not escape from them and yet what a subtle magic there was in ' \
-                                   'them they seemed to be able to give a plastic form to formless things and ' \
-                                   'to have a music of their own as sweet as that of viol or of lute mere' \
-                                   ' words was there anything so real as words also heres a hyphenated-word'
+        expected_sentence_result = 'words mere words how terrible they were how clear and vivid and ' \
+                                   'cruel one could not escape from them. and yet what a subtle magic ' \
+                                   'there was in them they seemed .to be able to give a plastic form to ' \
+                                   'formless things and. to have a music of their own as sweet as that of ' \
+                                   'viol or of lute. mere words was there anything so real as words also ' \
+                                   'heres a hyphenated-word.'
 
         self.assertEqual(sanitize_blogpost(fake_post), expected_word_result)
         self.assertEqual(sanitize_blogpost(
