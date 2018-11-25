@@ -9,7 +9,7 @@ class TestBlogParser(TestCase):
 
     @mock.patch('src.blog_parser.word_client', new=MockRedis(cache={'foo': 2, 'bar': 1}))
     @mock.patch('src.blog_parser.blogs_scraped_counter', new=1)
-    @mock.patch('src.db_utils._db_cursor', new=MockPostgresCursor())
+    @mock.patch('src.utils.pg._db_cursor', new=MockPostgresCursor())
     def test_result_generator(self):
         """
         Test ensures that stats can be calculated, given a functioning redis client
@@ -17,7 +17,7 @@ class TestBlogParser(TestCase):
         get_results()
 
     @mock.patch('src.blog_parser.word_client', new=MockRedis(cache={'foo': 2, 'bar': 1}))
-    @mock.patch('src.db_utils._db_cursor', new=MockPostgresCursor())
+    @mock.patch('src.utils.pg._db_cursor', new=MockPostgresCursor())
     def test_word_analyze(self):
         """
         Check that the analyzer runs and doesn't bark at empty strings
