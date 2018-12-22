@@ -24,7 +24,7 @@ def get_blogpost_links():
                          features='html.parser')
     links = [l.attrs['href'] for l in soup.findAll('link', attrs={'href': re.compile(parser_util.POST_PREFIX_REGEX),
                                                                   'rel': parser_util.POST_URL_REL})]
-    word_client.set(LINKS_KEY, links)
+    word_client.set(LINKS_KEY, str(links))
 
     return links
 
