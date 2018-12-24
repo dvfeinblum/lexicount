@@ -63,7 +63,8 @@ async def parse_blog_post(blog_link):
     for sentence in sanitized_post_text.split('.'):
         # TODO: Implement word2vec and send actual vector instead of empty tuple
         pg.update_sentence_details(sentence, blog_link, '{}')
-        [analyze_word(word.strip(), blog_link) for word in sentence.split(' ')]
+        for word in sentence.split(' '):
+            analyze_word(word.strip(), blog_link)
 
     blogs_scraped_counter = blogs_scraped_counter + 1
 
