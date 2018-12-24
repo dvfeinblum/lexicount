@@ -142,6 +142,5 @@ def main():
         loop.run_until_complete(fetch_posts(blog_links))
     finally:
         loop.close()
-
-    get_results()
-    pg.close_db_connection()
+        get_results()
+        pg.close_db_connection()

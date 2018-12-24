@@ -30,6 +30,7 @@ _db_conn = pg.connect(host=_PG_HOST,
                       port=_PG_PORT,
                       user=_PG_USER,
                       database=_PG_DB)
+_db_conn.set_session(autocommit=True)
 _db_cursor = _db_conn.cursor()
 
 
@@ -97,5 +98,4 @@ def get_unique_words():
 
 def close_db_connection():
     _db_cursor.close()
-    _db_conn.commit()
     _db_conn.close()
