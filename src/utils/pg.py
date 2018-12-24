@@ -30,6 +30,7 @@ _db_conn = pg.connect(host=_PG_HOST,
                       port=_PG_PORT,
                       user=_PG_USER,
                       database=_PG_DB)
+_db_conn.set_session(autocommit=True)
 _db_cursor = _db_conn.cursor()
 
 
@@ -37,10 +38,13 @@ def _execute_query(query):
     """
     Fetches a connection to our pg db
     """
-    _db_cursor.execute(query)
     try:
+        _db_cursor.execute(query)
         result = _db_cursor.fetchall()
     except pg.ProgrammingError:
+        result = None
+    except pg.IntegrityError:
+        print('Violated a DB constraint with query: ' + query)
         result = None
     return result
 
@@ -97,5 +101,4 @@ def get_unique_words():
 
 def close_db_connection():
     _db_cursor.close()
-    _db_conn.commit()
     _db_conn.close()
