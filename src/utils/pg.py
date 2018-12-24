@@ -38,10 +38,13 @@ def _execute_query(query):
     """
     Fetches a connection to our pg db
     """
-    _db_cursor.execute(query)
     try:
+        _db_cursor.execute(query)
         result = _db_cursor.fetchall()
     except pg.ProgrammingError:
+        result = None
+    except pg.IntegrityError:
+        print('Violated a DB constraint with query: ' + query)
         result = None
     return result
 
